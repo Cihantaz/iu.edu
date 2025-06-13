@@ -2,25 +2,18 @@ import streamlit as st
 import pandas as pd
 import io
 import os
-import base64
 
 st.set_page_config(page_title="Sınav Yerleştirme Analiz", layout="wide")  # <-- EN BAŞTA OLMALI
 
-# --- LOGO EKLEME (En üstte ortada, 3 kat büyük) ---
-def get_base64_image(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode()
-
-logo_path = os.path.join("static", "iu.logo.png")
-logo_html = ""
-if os.path.exists(logo_path):
-    logo_base64 = get_base64_image(logo_path)
-    logo_html = f"""
-    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
-        <img src="data:image/png;base64,{logo_base64}" width="660" style="display:block; margin:auto;"/>
-    </div>
+# --- LOGO EKLEME (En üstte ortada, URL ile) ---
+st.markdown(
     """
-st.markdown(logo_html, unsafe_allow_html=True)
+    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
+        <img src="https://e-campus.isikun.edu.tr/Content/img/iu_logo-mavi.png" width="660" style="display:block; margin:auto;"/>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 # --- LOGO EKLEME SONU ---
 
 st.markdown(
@@ -276,17 +269,12 @@ if uploaded_file is not None:
                 use_container_width=True
             )
 
-# --- ALT BİLGİ ve LOGO (footer) ---(Yarıya düşürüldü)
-footer_logo_path = os.path.join("static", "mesela.png")
-footer_logo_html = ""
-if os.path.exists(footer_logo_path):
-    footer_logo_base64 = get_base64_image(footer_logo_path)
-    footer_logo_html = f'<img src="data:image/png;base64,{footer_logo_base64}" width="30" style="vertical-align:middle;margin-right:10px;">'
-
+# --- ALT BİLGİ ve LOGO (footer, URL ile) ---
+footer_logo_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBgIsV4SxpHYHByQlUC97x6Pkp-iizTssT2A&s"
 st.markdown(
     f"""
     <div class="footer" style="text-align:left;">
-        {footer_logo_html}
+        <img src="{footer_logo_url}" width="30" style="vertical-align:middle;margin-right:10px;">
         <span style="font-size:14px;vertical-align:middle;">
             IŞIK ÜNİVERSİTESİ ÖĞRENCİ İŞLERİ DAİRE BAŞKANLIĞI
         </span>
@@ -331,6 +319,25 @@ st.markdown(
 #    - Streamlit uygulamaları için .exe üretmek pratik değildir.
 #    - Flask uygulamaları için PyInstaller ile .exe ve template gömme mümkündür.
 #    - Streamlit'te HTML template yoktur, arayüz kodun içindedir.
+
+# Streamlit'te Jinja2/HTML template kodları (ör: {% for d in debug %} ... {% endfor %}) kullanılamaz!
+# Streamlit sadece Python kodu ve st.markdown/st.write ile çalışır.
+# Arayüzde kod görünmesinin sebebi, HTML/Jinja2 kodlarının Streamlit'e yapıştırılmasıdır.
+# Doğru kullanım örneği:
+
+# Eğer debug çıktısı göstermek istiyorsanız:
+if "debug" in st.session_state and st.session_state.debug:
+    st.markdown("#### Debug Çıktıları")
+    for d in st.session_state.debug:
+        st.write(d)
+
+# veya analiz sırasında debug listesini oluşturup:
+# st.session_state.debug = debug
+
+# Notlar:
+# - Streamlit'te Jinja2 template kodları çalışmaz, sadece Python kodu ve Streamlit API'si kullanılır.
+# - Github Actions ile Streamlit uygulamasını otomatik deploy etmek için Streamlit Community Cloud veya başka bir servis gerekir.
+# - Localde çalışan arayüz ile Github'daki arayüz farklıysa, kodun tamamını Github'a yüklediğinizden ve requirements.txt dosyanızın güncel olduğundan emin olun.
 
 if __name__ == "__main__":
     import webbrowser
